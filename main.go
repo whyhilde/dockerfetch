@@ -18,8 +18,10 @@ func main() {
 
 	ctx := context.Background()
 
-	info := src.CollectDockerInfo(cli, ctx)
-	src.Display(info)
+	cfg := src.SetOptions()
+
+	info := src.CollectDockerInfo(cli, ctx, cfg)
+	src.Display(info, cfg)
 
 	os.Exit(0)
 }
