@@ -3,6 +3,7 @@ package src
 import (
 	"context"
 
+	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
 )
 
@@ -24,4 +25,25 @@ func GetDockerVersion(
 	}
 
 	return version.Version, version.APIVersion, version.Os, version.Arch, nil
+}
+
+func GetContainerStats(cli *client.Client, ctx context.Context) (int, int, int, error) {
+	containers, err := cli.ContainerList(ctx, container.ListOptions{All: true})
+	if err != nil {
+		return 0, 0, 0, err
+	}
+
+	total := len(containers)
+	running := 0
+	stopped := 0
+
+	for _, container := range containers {
+		if container.State == "running" {
+			running++
+		} else {
+			stopped++
+		}
+	}
+
+	return total, running, stopped, nil
 }
