@@ -42,6 +42,10 @@ func CollectDockerInfo(cli *client.Client, ctx context.Context, cfg *Config) []s
 		lines = append(lines, FormatInfoLines("Images", fmt.Sprint(images), cfg))
 	}
 
+	if volumes, err := GetVolumesStats(cli, ctx); err == nil {
+		lines = append(lines, FormatInfoLines("Volumes", fmt.Sprint(volumes), cfg))
+	}
+
 	return lines
 }
 
