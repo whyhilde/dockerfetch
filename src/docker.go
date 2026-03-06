@@ -5,6 +5,7 @@ import (
 
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/image"
+	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/api/types/volume"
 	"github.com/docker/docker/client"
 )
@@ -66,4 +67,13 @@ func GetVolumesStats(cli *client.Client, ctx context.Context) (int, error) {
 	}
 
 	return len(volumes.Volumes), nil
+}
+
+func GetNetworksStats(cli *client.Client, ctx context.Context) (int, error) {
+	networks, err := cli.NetworkList(ctx, network.ListOptions{})
+	if err != nil {
+		return 0, err
+	}
+
+	return len(networks), nil
 }
