@@ -38,6 +38,10 @@ func CollectDockerInfo(cli *client.Client, ctx context.Context, cfg *Config) []s
 		)
 	}
 
+	if images, err := GetImagesStats(cli, ctx); err == nil {
+		lines = append(lines, FormatInfoLines("Images", fmt.Sprint(images), cfg))
+	}
+
 	return lines
 }
 

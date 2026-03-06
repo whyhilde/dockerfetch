@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/client"
 )
 
@@ -46,4 +47,13 @@ func GetContainerStats(cli *client.Client, ctx context.Context) (int, int, int, 
 	}
 
 	return total, running, stopped, nil
+}
+
+func GetImagesStats(cli *client.Client, ctx context.Context) (int, error) {
+	images, err := cli.ImageList(ctx, image.ListOptions{All: true})
+	if err != nil {
+		return 0, err
+	}
+
+	return len(images), nil
 }
