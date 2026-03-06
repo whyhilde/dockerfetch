@@ -7,33 +7,33 @@ import (
 	"github.com/docker/docker/client"
 )
 
-func FormatInfoLines(key string, value string, spaces string, cfg *Config) string {
-	line := cfg.KeyC + cfg.Bold + key + cfg.Sep + spaces + cfg.ValueC + value
-	return line
+func FormatInfoLines(key string, value string, cfg *Config) string {
+	return fmt.Sprintf(
+		"%s%-*s %s",
+		cfg.KeyC+cfg.Bold,
+		cfg.KeyWidth+1,
+		key+cfg.Sep,
+		cfg.ValueC+value,
+	)
 }
 
 func CollectDockerInfo(cli *client.Client, ctx context.Context, cfg *Config) []string {
 	var lines []string
 
 	if ver, api, os, arch, err := GetDockerVersion(cli, ctx); err == nil {
-		lines = append(lines, fmt.Sprint(FormatInfoLines("Version", ver, "    ", cfg)))
-		lines = append(lines, fmt.Sprint(FormatInfoLines("API", api, "        ", cfg)))
-		lines = append(lines, fmt.Sprint(FormatInfoLines("OS", os, "         ", cfg)))
-		lines = append(lines, fmt.Sprint(FormatInfoLines("Arch", arch, "       ", cfg)))
+		lines = append(lines, FormatInfoLines("Version", ver, cfg))
+		lines = append(lines, FormatInfoLines("API", api, cfg))
+		lines = append(lines, FormatInfoLines("OS", os, cfg))
+		lines = append(lines, FormatInfoLines("Arch", arch, cfg))
 	}
 
 	if total, running, stopped, err := GetContainerStats(cli, ctx); err == nil {
 		lines = append(
 			lines,
-			fmt.Sprintf(
-				"%s%sContainers%s %s%d (running: %d, stopped: %d)",
-				cfg.KeyC,
-				cfg.Bold,
-				cfg.Sep,
-				cfg.ValueC,
-				total,
-				running,
-				stopped,
+			FormatInfoLines(
+				"Containers",
+				fmt.Sprint(total, " (running: ", running, ", stopped: ", stopped, ")"),
+				cfg,
 			),
 		)
 	}
