@@ -12,12 +12,10 @@ type Config struct {
 
 func SetOptions() *Config {
 	cfg := &Config{
-		LogoC:    "\033[34m",
-		KeyC:     "\033[34m",
-		ValueC:   "\033[0m",
+		LogoC:    "blue",
+		KeyC:     "blue",
+		ValueC:   "normal",
 		KeyWidth: 10,
-		Reset:    "\033[0m",
-		Bold:     "\033[1m",
 		Sep:      ":",
 	}
 

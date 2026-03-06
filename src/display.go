@@ -10,10 +10,10 @@ import (
 func FormatInfoLines(key string, value string, cfg *Config) string {
 	return fmt.Sprintf(
 		"%s%-*s %s",
-		cfg.KeyC+cfg.Bold,
+		GetColorCode(cfg.KeyC)+Bold,
 		cfg.KeyWidth+1,
 		key+cfg.Sep,
-		cfg.ValueC+value,
+		GetColorCode(cfg.ValueC)+value,
 	)
 }
 
@@ -74,7 +74,7 @@ func Display(info []string, cfg *Config) {
 	for i := 0; i < maxLines; i++ {
 		logoLine := ""
 		if i < len(logo) {
-			logoLine = cfg.LogoC + cfg.Bold + logo[i] + cfg.Reset
+			logoLine = GetColorCode(cfg.LogoC) + Bold + logo[i] + Reset
 		}
 
 		infoLine := ""
