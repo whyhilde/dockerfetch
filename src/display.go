@@ -20,11 +20,8 @@ func FormatInfoLines(key string, value string, cfg *Config) string {
 func CollectDockerInfo(cli *client.Client, ctx context.Context, cfg *Config) []string {
 	var lines []string
 
-	if ver, api, os, arch, err := GetDockerVersion(cli, ctx); err == nil {
-		lines = append(lines, FormatInfoLines("Version", ver, cfg))
-		lines = append(lines, FormatInfoLines("API", api, cfg))
-		lines = append(lines, FormatInfoLines("OS", os, cfg))
-		lines = append(lines, FormatInfoLines("Arch", arch, cfg))
+	if version, err := GetDockerVersion(cli, ctx); err == nil {
+		lines = append(lines, FormatInfoLines("Version", version, cfg))
 	}
 
 	if total, running, stopped, err := GetContainerStats(cli, ctx); err == nil {

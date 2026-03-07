@@ -18,16 +18,13 @@ func NewDockerClient() (*client.Client, error) {
 	return cli, nil
 }
 
-func GetDockerVersion(
-	cli *client.Client,
-	ctx context.Context,
-) (string, string, string, string, error) {
+func GetDockerVersion(cli *client.Client, ctx context.Context) (string, error) {
 	version, err := cli.ServerVersion(ctx)
 	if err != nil {
-		return "", "", "", "", err
+		return "", err
 	}
 
-	return version.Version, version.APIVersion, version.Os, version.Arch, nil
+	return version.Version, nil
 }
 
 func GetContainerStats(cli *client.Client, ctx context.Context) (int, int, int, error) {
