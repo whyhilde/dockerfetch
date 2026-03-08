@@ -74,3 +74,15 @@ func GetNetworksStats(cli *client.Client, ctx context.Context) (int, error) {
 
 	return len(networks), nil
 }
+
+func GetDockerInfo(
+	cli *client.Client,
+	ctx context.Context,
+) (cgroup string, root string, err error) {
+	info, err := cli.Info(ctx)
+	if err != nil {
+		return "", "", err
+	}
+
+	return info.CgroupDriver, info.DockerRootDir, nil
+}

@@ -47,6 +47,11 @@ func CollectDockerInfo(cli *client.Client, ctx context.Context, cfg *Config) []s
 		lines = append(lines, FormatInfoLines("Networks", fmt.Sprint(networks), cfg))
 	}
 
+	if cgroup, root, err := GetDockerInfo(cli, ctx); err == nil {
+		lines = append(lines, FormatInfoLines("Cgroup dr", cgroup, cfg))
+		lines = append(lines, FormatInfoLines("Root", root, cfg))
+	}
+
 	return lines
 }
 
