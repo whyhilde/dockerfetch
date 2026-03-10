@@ -24,6 +24,8 @@ func CollectDockerInfo(cli *client.Client, ctx context.Context, cfg *Config) []s
 		lines = append(lines, FormatInfoLines("Version", version, cfg))
 	}
 
+	lines = append(lines, FormatInfoLines("OS", GetOsName(), cfg))
+
 	if total, running, stopped, err := GetContainerStats(cli, ctx); err == nil {
 		lines = append(
 			lines,

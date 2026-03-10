@@ -1,7 +1,12 @@
 package src
 
 import (
+	"bufio"
 	"context"
+	"os"
+	"os/exec"
+	"runtime"
+	"strings"
 
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/image"
@@ -16,6 +21,46 @@ func NewDockerClient() (*client.Client, error) {
 		return nil, err
 	}
 	return cli, nil
+}
+
+func GetOsName() string {
+	switch runtime.GOOS {
+
+	case "linux":
+		file, err := os.Open("/etc/os-release")
+		if err != nil {
+			return "Linux"
+		}
+		defer file.Close()
+
+		scanner := bufio.NewScanner(file)
+		for scanner.Scan() {
+			line := scanner.Text()
+
+			if value, ok := strings.CutPrefix(line, "PRETTY_NAME="); ok {
+				value = strings.Trim(value, `"`)
+				return value
+			}
+		}
+
+	case "darwin":
+		out, err := exec.Command("sw_vers", "-productVersion").Output()
+		if err != nil {
+			return "MacOS"
+		}
+
+		return "MacOS " + strings.TrimSpace(string(out))
+
+	case "windows":
+		out, err := exec.Command("cmd", "/c", "ver").Output()
+		if err != nil {
+			return "Windows"
+		}
+
+		return strings.TrimSpace(string(out))
+	}
+
+	return runtime.GOOS
 }
 
 func GetDockerVersion(cli *client.Client, ctx context.Context) (string, error) {
