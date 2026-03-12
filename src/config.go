@@ -15,7 +15,7 @@ func SetOptions() *Config {
 		LogoC:    "blue",
 		KeyC:     "blue",
 		ValueC:   "normal",
-		KeyWidth: 10,
+		KeyWidth: 14,
 		Sep:      ":",
 	}
 

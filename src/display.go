@@ -43,9 +43,11 @@ func CollectDockerInfo(info *DockerInfo, cfg *Config) []string {
 
 	lines = append(lines, FormatInfoLines("Networks", fmt.Sprint(info.Networks), cfg))
 
-	lines = append(lines, FormatInfoLines("Cgroup dr", info.CgroupDriver, cfg))
+	lines = append(lines, FormatInfoLines("Cgroup driver", info.CgroupDriver, cfg))
 
-	lines = append(lines, FormatInfoLines("Root", info.DockerRoot, cfg))
+	lines = append(lines, FormatInfoLines("Storage driver", info.Driver, cfg))
+
+	lines = append(lines, FormatInfoLines("Root dir", info.DockerRoot, cfg))
 
 	return lines
 }

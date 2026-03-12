@@ -124,13 +124,13 @@ func GetNetworksStats(cli *client.Client, ctx context.Context) (int, error) {
 func GetDockerInfo(
 	cli *client.Client,
 	ctx context.Context,
-) (cgroup string, root string, err error) {
+) (cgroup string, driver string, root string, err error) {
 	info, err := cli.Info(ctx)
 	if err != nil {
-		return "", "", err
+		return "", "", "", err
 	}
 
-	return info.CgroupDriver, info.DockerRootDir, nil
+	return info.CgroupDriver, info.Driver, info.DockerRootDir, nil
 }
 
 type DockerInfo struct {
@@ -144,6 +144,7 @@ type DockerInfo struct {
 	Networks          int
 	CgroupDriver      string
 	DockerRoot        string
+	Driver            string
 }
 
 func FetchDockerInfo(cli *client.Client, ctx context.Context) (*DockerInfo, error) {
@@ -254,7 +255,7 @@ func FetchDockerInfo(cli *client.Client, ctx context.Context) (*DockerInfo, erro
 	go func() {
 		defer wg.Done()
 
-		cgroup, root, err := GetDockerInfo(cli, ctx)
+		cgroup, driver, root, err := GetDockerInfo(cli, ctx)
 		if err != nil {
 			mu.Lock()
 			errors = append(errors, err)
@@ -264,6 +265,7 @@ func FetchDockerInfo(cli *client.Client, ctx context.Context) (*DockerInfo, erro
 
 		mu.Lock()
 		info.CgroupDriver = cgroup
+		info.Driver = driver
 		info.DockerRoot = root
 		mu.Unlock()
 	}()
