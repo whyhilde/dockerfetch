@@ -19,9 +19,14 @@ func main() {
 	ctx := context.Background()
 
 	cfg := src.SetOptions()
+	info, err := src.FetchDockerInfo(cli, ctx)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error fetching docker info: %v\n", err)
+		os.Exit(1)
+	}
 
-	info := src.CollectDockerInfo(cli, ctx, cfg)
-	src.Display(info, cfg)
+	lines := src.CollectDockerInfo(info, cfg)
+	src.Display(lines, cfg)
 
 	os.Exit(0)
 }

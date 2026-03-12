@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"runtime"
 	"strings"
+	"sync"
 
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/image"
@@ -130,4 +131,148 @@ func GetDockerInfo(
 	}
 
 	return info.CgroupDriver, info.DockerRootDir, nil
+}
+
+type DockerInfo struct {
+	OsName            string
+	Version           string
+	ContainersTotal   int
+	ContainersRunning int
+	ContainersStopped int
+	Volumes           int
+	Images            int
+	Networks          int
+	CgroupDriver      string
+	DockerRoot        string
+}
+
+func FetchDockerInfo(cli *client.Client, ctx context.Context) (*DockerInfo, error) {
+	info := &DockerInfo{}
+	var wg sync.WaitGroup
+	var mu sync.Mutex
+	var errors []error
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+
+		version, err := GetDockerVersion(cli, ctx)
+		if err != nil {
+			mu.Lock()
+			errors = append(errors, err)
+			mu.Unlock()
+			return
+		}
+
+		mu.Lock()
+		info.Version = version
+		mu.Unlock()
+	}()
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+
+		osname := GetOsName()
+
+		mu.Lock()
+		info.OsName = osname
+		mu.Unlock()
+	}()
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+
+		containersTotal, containersRunning, containersStopped, err := GetContainerStats(cli, ctx)
+		if err != nil {
+			mu.Lock()
+			errors = append(errors, err)
+			mu.Unlock()
+			return
+		}
+
+		mu.Lock()
+		info.ContainersTotal = containersTotal
+		info.ContainersRunning = containersRunning
+		info.ContainersStopped = containersStopped
+		mu.Unlock()
+	}()
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+
+		images, err := GetImagesStats(cli, ctx)
+		if err != nil {
+			mu.Lock()
+			errors = append(errors, err)
+			mu.Unlock()
+			return
+		}
+
+		mu.Lock()
+		info.Images = images
+		mu.Unlock()
+	}()
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+
+		volumes, err := GetVolumesStats(cli, ctx)
+		if err != nil {
+			mu.Lock()
+			errors = append(errors, err)
+			mu.Unlock()
+			return
+		}
+
+		mu.Lock()
+		info.Volumes = volumes
+		mu.Unlock()
+	}()
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+
+		networks, err := GetNetworksStats(cli, ctx)
+		if err != nil {
+			mu.Lock()
+			errors = append(errors, err)
+			mu.Unlock()
+			return
+		}
+
+		mu.Lock()
+		info.Networks = networks
+		mu.Unlock()
+	}()
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+
+		cgroup, root, err := GetDockerInfo(cli, ctx)
+		if err != nil {
+			mu.Lock()
+			errors = append(errors, err)
+			mu.Unlock()
+			return
+		}
+
+		mu.Lock()
+		info.CgroupDriver = cgroup
+		info.DockerRoot = root
+		mu.Unlock()
+	}()
+
+	wg.Wait()
+
+	if len(errors) > 0 {
+		return info, errors[0]
+	}
+
+	return info, nil
 }

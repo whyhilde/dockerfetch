@@ -1,10 +1,7 @@
 package src
 
 import (
-	"context"
 	"fmt"
-
-	"github.com/docker/docker/client"
 )
 
 func FormatInfoLines(key string, value string, cfg *Config) string {
@@ -17,48 +14,44 @@ func FormatInfoLines(key string, value string, cfg *Config) string {
 	)
 }
 
-func CollectDockerInfo(cli *client.Client, ctx context.Context, cfg *Config) []string {
+func CollectDockerInfo(info *DockerInfo, cfg *Config) []string {
 	var lines []string
 
-	if version, err := GetDockerVersion(cli, ctx); err == nil {
-		lines = append(lines, FormatInfoLines("Version", version, cfg))
-	}
+	lines = append(lines, FormatInfoLines("Version", info.Version, cfg))
 
-	lines = append(lines, FormatInfoLines("OS", GetOsName(), cfg))
+	lines = append(lines, FormatInfoLines("OS", info.OsName, cfg))
 
-	if total, running, stopped, err := GetContainerStats(cli, ctx); err == nil {
-		lines = append(
-			lines,
-			FormatInfoLines(
-				"Containers",
-				fmt.Sprint(total, " (running: ", running, ", stopped: ", stopped, ")"),
-				cfg,
+	lines = append(
+		lines,
+		FormatInfoLines(
+			"Containers",
+			fmt.Sprint(
+				info.ContainersTotal,
+				" (running: ",
+				info.ContainersRunning,
+				", stopped: ",
+				info.ContainersStopped,
+				")",
 			),
-		)
-	}
+			cfg,
+		),
+	)
 
-	if images, err := GetImagesStats(cli, ctx); err == nil {
-		lines = append(lines, FormatInfoLines("Images", fmt.Sprint(images), cfg))
-	}
+	lines = append(lines, FormatInfoLines("Images", fmt.Sprint(info.Images), cfg))
 
-	if volumes, err := GetVolumesStats(cli, ctx); err == nil {
-		lines = append(lines, FormatInfoLines("Volumes", fmt.Sprint(volumes), cfg))
-	}
+	lines = append(lines, FormatInfoLines("Volumes", fmt.Sprint(info.Volumes), cfg))
 
-	if networks, err := GetNetworksStats(cli, ctx); err == nil {
-		lines = append(lines, FormatInfoLines("Networks", fmt.Sprint(networks), cfg))
-	}
+	lines = append(lines, FormatInfoLines("Networks", fmt.Sprint(info.Networks), cfg))
 
-	if cgroup, root, err := GetDockerInfo(cli, ctx); err == nil {
-		lines = append(lines, FormatInfoLines("Cgroup dr", cgroup, cfg))
-		lines = append(lines, FormatInfoLines("Root", root, cfg))
-	}
+	lines = append(lines, FormatInfoLines("Cgroup dr", info.CgroupDriver, cfg))
+
+	lines = append(lines, FormatInfoLines("Root", info.DockerRoot, cfg))
 
 	return lines
 }
 
-func Display(info []string, cfg *Config) {
-	logo := []string{
+func Display(infoLines []string, cfg *Config) {
+	logoLines := []string{
 		"               ###       ##    ",
 		"       ### ### ###       ######",
 		"   ### ### ### ### ###   ####  ",
@@ -70,20 +63,20 @@ func Display(info []string, cfg *Config) {
 		"      ############             ",
 	}
 
-	maxLines := len(logo)
-	if len(info) > maxLines {
-		maxLines = len(info)
+	maxLines := len(logoLines)
+	if len(infoLines) > maxLines {
+		maxLines = len(infoLines)
 	}
 
 	for i := 0; i < maxLines; i++ {
 		logoLine := ""
-		if i < len(logo) {
-			logoLine = GetColorCode(cfg.LogoC) + Bold + logo[i] + Reset
+		if i < len(logoLines) {
+			logoLine = GetColorCode(cfg.LogoC) + Bold + logoLines[i] + Reset
 		}
 
 		infoLine := ""
-		if i < len(info) {
-			infoLine = info[i]
+		if i < len(infoLines) {
+			infoLine = infoLines[i]
 		}
 
 		fmt.Printf("%s   %s\n", logoLine, infoLine)
