@@ -1,4 +1,4 @@
-package src
+package color
 
 import (
 	"fmt"
@@ -49,17 +49,17 @@ func GetColorCode(color string) string {
 	}
 
 	if strings.HasPrefix(color, "#") {
-		return hexToANSI(color)
+		return HexToANSI(color)
 	}
 
 	if strings.Contains(color, ",") {
-		return rgbToANSI(color)
+		return RgbToANSI(color)
 	}
 
 	return ""
 }
 
-func hexToANSI(hex string) string {
+func HexToANSI(hex string) string {
 	hex = strings.TrimPrefix(hex, "#")
 
 	if len(hex) != 6 {
@@ -77,7 +77,7 @@ func hexToANSI(hex string) string {
 	return fmt.Sprintf("\033[38;2;%d;%d;%dm", r, g, b)
 }
 
-func rgbToANSI(rgb string) string {
+func RgbToANSI(rgb string) string {
 	parts := strings.Split(rgb, ",")
 	if len(parts) != 3 {
 		return ""

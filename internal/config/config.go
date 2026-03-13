@@ -1,4 +1,4 @@
-package src
+package config
 
 type Config struct {
 	LogoC    string
