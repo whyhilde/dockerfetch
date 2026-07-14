@@ -84,10 +84,16 @@ func (r *Renderer) renderSideBySide(ascii []string, info []docker.Line) string {
 		}
 	}
 
+	maxVal := 0
+	for _, l := range info {
+		if len(l.Value) > maxVal {
+			maxVal = len(l.Value)
+		}
+	}
+
 	var infoCol []string
 	for _, l := range info {
-		key := colorize(Bold, l.Key+":")
-		key = padRight(key, maxKey+2)
+		key := colorize(Bold, padRight(l.Key+":", maxKey+1))
 		value := colorize(Cyan, l.Value)
 		infoCol = append(infoCol, key+" "+value)
 	}
@@ -105,13 +111,15 @@ func (r *Renderer) renderSideBySide(ascii []string, info []docker.Line) string {
 	for i := 0; i < maxLines; i++ {
 		left := ""
 		if i < len(ascii) {
-			left = colorize(Blue, ascii[i])
+			left = colorize(Blue, padRight(ascii[i], asciiWidth))
+		} else {
+			left = colorize(Blue, padRight("", asciiWidth))
 		}
 		right := ""
 		if i < len(infoCol) {
 			right = infoCol[i]
 		}
-		out += left + "   " + right + "\n"
+		out += " " + left + "  " + right + "\n"
 	}
 
 	return out
